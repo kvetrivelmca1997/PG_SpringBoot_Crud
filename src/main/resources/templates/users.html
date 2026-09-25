@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All users · User Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark">U</span><span class="brand-name">User Directory</span></a>
+    <nav class="nav">
+      <a href="/">Manage</a>
+      <a class="active" href="/getallusers">All users</a>
+      <a href="/usersusingpagination">Page by page</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1>All users</h1>
+      <p class="sub">Use the ID to find, rename or remove someone.</p>
+    </div>
+    <a class="btn btn-primary" href="/#add-title">Add user</a>
+  </div>
+
+  <div class="toolbar" th:if="${!#lists.isEmpty(users)}">
+    <input type="search" id="filter" placeholder="Filter by name or email" aria-label="Filter by name or email">
+    <span class="count" th:text="${#lists.size(users)} + ' users'">3 users</span>
+  </div>
+
+  <div class="people" id="people">
+    <div class="person" th:each="user : ${users}" th:attr="data-search=${#strings.toLowerCase(user.name + ' ' + user.email)}">
+      <div class="avatar" th:text="${#strings.isEmpty(user.name)} ? '?' : ${#strings.toUpperCase(#strings.substring(user.name,0,1))}">P</div>
+      <div>
+        <div class="person-name" th:text="${user.name}">Priya Raman</div>
+        <div class="person-meta"><span class="id-chip" th:text="'#' + ${user.id}">#1</span><span th:text="${user.email}">priya@example.com</span></div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-ghost btn-sm" th:href="@{/(updateId=${user.id},updateName=${user.name})}">Rename</a>
+        <form action="/delete" method="POST" th:data-name="${user.name}" onsubmit="return confirm('Remove ' + this.dataset.name + '? This cannot be undone.')">
+          <input type="hidden" name="deleteId" th:value="${user.id}">
+          <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="empty" th:if="${#lists.isEmpty(users)}">
+      <div class="big" aria-hidden="true">🗂</div>
+      <h2>No users yet</h2>
+      <p>Add the first person and they will appear here.</p>
+      <a class="btn btn-primary" href="/">Add a user</a>
+    </div>
+  </div>
+  <p class="empty" id="no-match" hidden>No users match that filter.</p>
+</main>
+
+<script>
+  var filter = document.getElementById('filter');
+  if (filter) {
+    filter.addEventListener('input', function () {
+      var q = filter.value.trim().toLowerCase(), shown = 0;
+      document.querySelectorAll('.person').forEach(function (row) {
+        var match = row.getAttribute('data-search').indexOf(q) !== -1;
+        row.hidden = !match; if (match) shown++;
+      });
+      document.getElementById('no-match').hidden = shown !== 0;
+    });
+  }
+</script>
+</body>
+</html>

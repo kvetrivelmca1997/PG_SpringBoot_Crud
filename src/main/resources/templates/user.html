@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User · User Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark">U</span><span class="brand-name">User Directory</span></a>
+    <nav class="nav">
+      <a href="/">Manage</a>
+      <a href="/getallusers">All users</a>
+      <a href="/usersusingpagination">Page by page</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div th:if="${user != null}">
+    <div class="page-head"><h1>User details</h1><a class="btn btn-ghost" href="/getallusers">Back to all users</a></div>
+    <section class="panel profile">
+      <div class="avatar" th:text="${#strings.isEmpty(user.name)} ? '?' : ${#strings.toUpperCase(#strings.substring(user.name,0,1))}">P</div>
+      <div>
+        <dl>
+          <dt>ID</dt><dd th:text="${user.id}">1</dd>
+          <dt>Name</dt><dd th:text="${user.name}">Priya Raman</dd>
+          <dt>Email</dt><dd th:text="${user.email}">priya@example.com</dd>
+        </dl>
+        <div class="actions" style="margin-top:18px">
+          <a class="btn btn-dark btn-sm" th:href="@{/(updateId=${user.id},updateName=${user.name})}">Rename</a>
+          <form action="/delete" method="POST" onsubmit="return confirm('Remove this user? This cannot be undone.')">
+            <input type="hidden" name="deleteId" th:value="${user.id}">
+            <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel empty" th:if="${user == null}">
+    <div class="big" aria-hidden="true">🔎</div>
+    <h2>No user with that ID</h2>
+    <p>Check the ID in the full list, then try again.</p>
+    <a class="btn btn-dark" href="/getallusers">See all users</a>
+  </section>
+</main>
+</body>
+</html>

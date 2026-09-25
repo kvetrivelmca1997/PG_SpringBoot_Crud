@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark">U</span><span class="brand-name">User Directory</span></a>
+    <nav class="nav">
+      <a class="active" href="/">Manage</a>
+      <a href="/getallusers">All users</a>
+      <a href="/usersusingpagination">Page by page</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1>Manage users</h1>
+      <p class="sub">Add people, look them up by ID, rename or remove them. Every change is saved to PostgreSQL.</p>
+    </div>
+    <a class="btn btn-dark" href="/getallusers">See all users</a>
+  </div>
+
+  <div class="workspace">
+    <section class="panel primary" aria-labelledby="add-title">
+      <h2 id="add-title"><span class="icon" aria-hidden="true">＋</span>Add a user</h2>
+      <p class="hint">Both fields are required.</p>
+      <form action="/add" method="POST">
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" placeholder="Priya Raman" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" placeholder="priya@example.com" required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Add user</button>
+      </form>
+    </section>
+
+    <div class="stack">
+      <section class="panel" aria-labelledby="find-title">
+        <h2 id="find-title"><span class="icon" aria-hidden="true">🔎</span>Find a user</h2>
+        <p class="hint">Don't know the ID? Open All users.</p>
+        <form action="/get" method="GET" class="row">
+          <div class="field">
+            <label for="userId">User ID</label>
+            <input type="number" min="1" name="userId" id="userId" required>
+          </div>
+          <button class="btn btn-dark" type="submit">Find</button>
+        </form>
+      </section>
+
+      <section class="panel" id="update-panel" aria-labelledby="update-title">
+        <h2 id="update-title"><span class="icon" aria-hidden="true">✎</span>Rename a user</h2>
+        <form action="/update" method="POST">
+          <div class="row" style="margin-bottom:12px">
+            <div class="field" style="max-width:120px">
+              <label for="updateId">User ID</label>
+              <input type="number" min="1" name="updateId" id="updateId" required>
+            </div>
+            <div class="field">
+              <label for="updateName">New name</label>
+              <input type="text" name="updateName" id="updateName" required>
+            </div>
+          </div>
+          <button class="btn btn-dark" type="submit">Save name</button>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="delete-title">
+        <h2 id="delete-title"><span class="icon" aria-hidden="true">🗑</span>Remove a user</h2>
+        <form action="/delete" method="POST" class="row" onsubmit="return confirm('Remove user #' + this.deleteId.value + '? This cannot be undone.')">
+          <div class="field">
+            <label for="deleteId">User ID</label>
+            <input type="number" min="1" name="deleteId" id="deleteId" required>
+          </div>
+          <button class="btn btn-danger" type="submit">Remove</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <p class="foot">Spring Boot, PostgreSQL, Docker and Jenkins</p>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="dot"></span><span id="toast-text"></span></div>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var messages = {
+      added:    ['User added.', false],
+      updated:  ['Name saved.', false],
+      deleted:  ['User removed.', false],
+      notfound: ['No user with that ID. Check the ID in All users.', true]
+    };
+    var msg = messages[params.get('msg')];
+    if (msg) {
+      var toast = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = msg[0];
+      if (msg[1]) toast.classList.add('warn');
+      setTimeout(function () { toast.classList.add('show'); }, 150);
+      setTimeout(function () { toast.classList.remove('show'); }, 4000);
+    }
+    // "Rename" links from the user list pre-fill the form
+    if (params.get('updateId')) {
+      document.getElementById('updateId').value = params.get('updateId');
+      document.getElementById('updateName').value = params.get('updateName') || '';
+      var panel = document.getElementById('update-panel');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('updateName').focus();
+      document.getElementById('updateName').select();
+    }
+    if (params.has('msg') || params.has('updateId')) history.replaceState(null, '', '/');
+  })();
+</script>
+</body>
+</html>

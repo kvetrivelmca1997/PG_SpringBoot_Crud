@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Users page by page · User Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark">U</span><span class="brand-name">User Directory</span></a>
+    <nav class="nav">
+      <a href="/">Manage</a>
+      <a href="/getallusers">All users</a>
+      <a class="active" href="/usersusingpagination">Page by page</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1>Users, page by page</h1>
+      <p class="sub" th:if="${usersPage.totalPages > 0}"
+         th:text="'Page ' + ${usersPage.number + 1} + ' of ' + ${usersPage.totalPages} + ', ' + ${usersPage.totalElements} + ' users in total'">Page 1 of 3</p>
+    </div>
+  </div>
+
+  <div class="people">
+    <div class="person" th:each="user : ${usersPage.content}">
+      <div class="avatar" th:text="${#strings.isEmpty(user.name)} ? '?' : ${#strings.toUpperCase(#strings.substring(user.name,0,1))}">P</div>
+      <div>
+        <div class="person-name" th:text="${user.name}">Priya Raman</div>
+        <div class="person-meta"><span class="id-chip" th:text="'#' + ${user.id}">#1</span><span th:text="${user.email}">priya@example.com</span></div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-ghost btn-sm" th:href="@{/(updateId=${user.id},updateName=${user.name})}">Rename</a>
+      </div>
+    </div>
+    <div class="empty" th:if="${usersPage.totalElements == 0}">
+      <div class="big" aria-hidden="true">🗂</div>
+      <h2>No users yet</h2>
+      <p>Add the first person and they will appear here.</p>
+      <a class="btn btn-primary" href="/">Add a user</a>
+    </div>
+  </div>
+
+  <ul class="pager" th:if="${usersPage.totalPages > 1}" aria-label="Pages">
+    <li th:if="${usersPage.hasPrevious()}"><a th:href="@{/usersusingpagination(page=${usersPage.number - 1})}" aria-label="Previous page">‹</a></li>
+    <li th:each="pageNumber : ${#numbers.sequence(0, usersPage.totalPages - 1)}"
+        th:class="${pageNumber == usersPage.number} ? 'active' : ''">
+      <a th:href="@{/usersusingpagination(page=${pageNumber})}" th:text="${pageNumber + 1}">1</a>
+    </li>
+    <li th:if="${usersPage.hasNext()}"><a th:href="@{/usersusingpagination(page=${usersPage.number + 1})}" aria-label="Next page">›</a></li>
+  </ul>
+</main>
+</body>
+</html>
